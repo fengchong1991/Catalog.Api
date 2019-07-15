@@ -1,0 +1,31 @@
+services:
+  catalog.api:
+    build:
+      context: C:\Users\fengc\source\repos\DotNetMicroservice\Catalog.Api\Catalog.Api
+    depends_on:
+    - sql.data
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTPS_PORT: '44342'
+      ASPNETCORE_URLS: https://+:443;http://+:80
+      ConnectionString: Server=tcp:localhost,5433;Initial Catalog=Microsoft.eShopOnContainers.Services.CatalogDb;User
+        Id=sa;Password=Pass@word
+    ports:
+    - published: 5001
+      target: 80
+    - published: 52253
+      target: 80
+    - published: 44342
+      target: 443
+    volumes:
+    - C:\Users\fengc\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
+    - C:\Users\fengc\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+  sql.data:
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: Pass@word
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    ports:
+    - published: 5434
+      target: 1433
+version: '3.4'
