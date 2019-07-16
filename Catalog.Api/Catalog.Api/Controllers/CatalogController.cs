@@ -20,7 +20,6 @@ namespace Catalog.Api.Controllers
         public CatalogController(CatalogContext context)
         {
             this._catalogContext = context;
-
         }
 
         // GET api/v1/[controller]/items[?pageSize=3&pageIndex=10]
@@ -33,6 +32,7 @@ namespace Catalog.Api.Controllers
         {
             if (!string.IsNullOrEmpty(ids))
             {
+
                 var items = await GetItemsByIdsAsync(ids);
 
                 if (!items.Any())
@@ -43,15 +43,25 @@ namespace Catalog.Api.Controllers
                 return Ok(items);
             }
 
-            var totalItems = await _catalogContext.CatalogItems.LongCountAsync();
+            //var totalItems = await _catalogContext.CatalogItems.LongCountAsync();
 
-            var itemsOnPage = await _catalogContext.CatalogItems
-                .OrderBy(c => c.Name)
+            //var itemsOnPage = await _catalogContext.CatalogItems
+            //    .OrderBy(c => c.Name)
+            //    .Skip(pageSize * pageIndex)
+            //    .Take(pageSize)
+            //    .ToListAsync();
+
+            //var model = new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
+
+            var totalItems = await _catalogContext.CatalogBrands.LongCountAsync();
+
+            var itemsOnPage = await _catalogContext.CatalogBrands
+                .OrderBy(c => c.Brand)
                 .Skip(pageSize * pageIndex)
                 .Take(pageSize)
                 .ToListAsync();
 
-            var model = new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
+            var model = new PaginatedItemsViewModel<CatalogBrand>(pageIndex, pageSize, totalItems, itemsOnPage);
 
             return Ok(model);
         }

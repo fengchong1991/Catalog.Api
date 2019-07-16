@@ -2,9 +2,11 @@ version: '3.4'
 
 services:
   catalog.api:
-    build: ./Catalog.Api
+    build: 
+      context: ./
+      dockerfile: Catalog.Api/Dockerfile
     environment:
-      ConnectionString: Server=tcp:localhost,5433;Initial Catalog=Microsoft.eShopOnContainers.Services.CatalogDb;User Id=sa;Password=Pass@word
+      ConnectionString: Server=sql.data;Initial Catalog=CatalogDb;User Id=sa;Password=Pass@word
     ports:
       - 5001:80
     depends_on:
