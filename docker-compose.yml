@@ -18,3 +18,7 @@ services:
       ACCEPT_EULA: Y
     ports:
       - 5434:1433
+  baset.data:
+    image: redis
+    expose:
+      - 6379
