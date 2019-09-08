@@ -7,8 +7,6 @@ services:
       dockerfile: Catalog.Api/Dockerfile
     environment:
       ConnectionString: Server=sql.data;Initial Catalog=CatalogDb;User Id=sa;Password=Pass@word
-    ports:
-      - 5001:80
     depends_on:
       - sql.data
   sql.data:

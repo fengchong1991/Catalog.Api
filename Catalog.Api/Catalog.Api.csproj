@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\IntegrationEventLog\IntegrationEventLog.csproj" />
     <ProjectReference Include="..\EventBus\EventBus.csproj" />
   </ItemGroup>
 
