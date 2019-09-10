@@ -13,6 +13,7 @@ using EventBus;
 using RabbitMQ.Client.Events;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Autofac;
 
 namespace EventBusRabbitMQ
 {
