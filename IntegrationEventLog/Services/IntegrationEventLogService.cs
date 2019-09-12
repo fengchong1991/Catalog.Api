@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EventBus.Events;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationEventLog.Services
 {
@@ -35,7 +36,16 @@ namespace IntegrationEventLog.Services
 
         public Task SaveEventAsync(IntegrationEvent @event, IDbContextTransaction transaction)
         {
-            throw new NotImplementedException();
+            if (transaction == null)
+            {
+                throw new ArgumentException(nameof(transaction));
+            }
+
+            var eventLogEntry = new IntegrationEventLogEntry(@event, transaction.TransactionId);
+            _integrationEventLogContext.Database.UseTransaction(transaction.GetDbTransaction());
+            _integrationEventLogContext.IntegrationEventLogs.Add(eventLogEntry);
+
+            return _integrationEventLogContext.SaveChangesAsync();
         }
 
         private Task UpdateEventStatus(Guid eventId, EventStateEnum status)
