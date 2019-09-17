@@ -10,3 +10,4 @@ namespace EventBus.Events
         Task Handle(T @event);
     }
 }
+ 
