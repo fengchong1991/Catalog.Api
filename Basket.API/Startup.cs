@@ -11,6 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using EventBusRabbitMQ;
+using Autofac;
+using EventBus;
+using Basket.API.IntegrationEvents.Events;
+using Basket.API.IntegrationEvents.EventHandling;
 
 namespace Basket.API
 {
@@ -27,6 +32,7 @@ namespace Basket.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            RegisterEventBus(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +49,8 @@ namespace Basket.API
 
             app.UseHttpsRedirection();
             app.UseMvc();
+
+            ConfigureEventBus(app);
         }
 
         /// <summary>
@@ -51,12 +59,22 @@ namespace Basket.API
         /// <param name="services"></param>
         private void RegisterEventBus(IServiceCollection services)
         {
+            services.AddSingleton<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>(sp =>
+            {
+                var serviceBusPersisterConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+                var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
+                var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ.EventBusRabbitMQ>>();
+                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
 
+                return new EventBusRabbitMQ.EventBusRabbitMQ(serviceBusPersisterConnection, logger, iLifetimeScope, eventBusSubcriptionsManager);
+            });
         }
 
         private void ConfigureEventBus(IApplicationBuilder app)
         {
             var eventbus = app.ApplicationServices.GetRequiredService<IEventBus>();
+
+            eventbus.Subscribe<ProductPriceChangedIntegrationEvent, ProductPriceChangedIntegrationEventHandler>();
         }
     }
 }

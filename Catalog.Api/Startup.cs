@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Data.Common;
 using Catalog.Api.Infrastructure;
+using Catalog.Api.IntegrationEvents;
+using EventBus.Abstractions;
+using IntegrationEventLog.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using EventBusRabbitMQ;
 
 namespace Catalog.Api
 {
@@ -43,6 +42,9 @@ namespace Catalog.Api
                     Description = "The Catalog Microservice HTTP API"
                 });
             });
+
+            AddIntegrationServices(services);
+            AddEventBus(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +66,24 @@ namespace Catalog.Api
 
             app.UseHttpsRedirection();
             app.UseMvc();
+        }
+
+        private void AddIntegrationServices(IServiceCollection services)
+        {
+            services.AddTransient<ICatalogIntegrationEventService, CatalogIntegrationEventService>();
+
+            services.AddTransient<Func<DbConnection, IIntegrationEventLogService>>(sp => connection =>
+            {
+                return new IntegrationEventLogService(connection);
+            });
+        }
+        
+        private void AddEventBus(IServiceCollection services)
+        {
+            services.AddTransient<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>();
+            services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
+            {
+            });
         }
     }
 }

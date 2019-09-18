@@ -8,6 +8,8 @@ using IntegrationEventLog.Utilities;
 using Catalog.Api.Infrastructure;
 using IntegrationEventLog.Services;
 using EventBus.Abstractions;
+using System.Data.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Catalog.Api.IntegrationEvents
 {
@@ -21,12 +23,13 @@ namespace Catalog.Api.IntegrationEvents
         public CatalogIntegrationEventService(
             ILogger<CatalogIntegrationEventService> logger,
             CatalogContext catalogContext,
-            IIntegrationEventLogService eventLogService,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            Func<DbConnection, IIntegrationEventLogService> integrationEventLogServiceFactory
+            )
         {
             _logger = logger;
             _catalogContext = catalogContext;
-            _eventLogService = eventLogService;
+            _eventLogService = integrationEventLogServiceFactory(_catalogContext.Database.GetDbConnection());
             _eventBus = eventBus;
         }
 

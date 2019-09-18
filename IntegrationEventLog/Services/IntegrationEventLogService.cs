@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EventBus.Events;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 
 namespace IntegrationEventLog.Services
 {
@@ -13,9 +14,13 @@ namespace IntegrationEventLog.Services
     {
         private readonly IntegrationEventLogContext _integrationEventLogContext;
 
-        public IntegrationEventLogService(IntegrationEventLogContext integrationEventLogContext)
+        public IntegrationEventLogService(DbConnection dbConnection)
         {
-            _integrationEventLogContext = integrationEventLogContext;
+            var dbcontextOption = new DbContextOptionsBuilder<IntegrationEventLogContext>()
+                .UseSqlServer(dbConnection)
+                .Options;
+
+            _integrationEventLogContext = new IntegrationEventLogContext(dbcontextOption);
         }
 
 
