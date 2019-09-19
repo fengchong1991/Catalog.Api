@@ -59,15 +59,7 @@ namespace Basket.API
         /// <param name="services"></param>
         private void RegisterEventBus(IServiceCollection services)
         {
-            services.AddSingleton<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>(sp =>
-            {
-                var serviceBusPersisterConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
-                var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
-                var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ.EventBusRabbitMQ>>();
-                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
-
-                return new EventBusRabbitMQ.EventBusRabbitMQ(serviceBusPersisterConnection, logger, iLifetimeScope, eventBusSubcriptionsManager);
-            });
+            services.AddSingleton<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>();
         }
 
         private void ConfigureEventBus(IApplicationBuilder app)

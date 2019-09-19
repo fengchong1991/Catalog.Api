@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using EventBusRabbitMQ;
+using RabbitMQ.Client;
+using EventBus;
 
 namespace Catalog.Api
 {
@@ -44,7 +46,8 @@ namespace Catalog.Api
             });
 
             AddIntegrationServices(services);
-            AddEventBus(services);
+            AddEventBus(services, Configuration);
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,14 +79,24 @@ namespace Catalog.Api
             {
                 return new IntegrationEventLogService(connection);
             });
+
+
         }
         
-        private void AddEventBus(IServiceCollection services)
+        private void AddEventBus(IServiceCollection services, IConfiguration configuration)
         {
             services.AddTransient<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>();
-            services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
+            services.AddSingleton<IRabbitMQPersistentConnection, DefaultRabbitMQPersistentConnection>();
+            services.AddSingleton<IConnectionFactory, ConnectionFactory>(sp =>
             {
+                return new ConnectionFactory()
+                {
+                    HostName = configuration["EventBusConnection"],
+                    DispatchConsumersAsync = true
+                };
             });
+
+            services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
         }
     }
 }
