@@ -41,8 +41,21 @@ CREATE TABLE CatalogItems
 INSERT INTO CatalogBrands (Brand) VALUES ('BMW')
 GO
 
-
 /*
 Create database for integration event log
 */
-CREATE DATABASE 
+CREATE DATABASE IntegrationEventLog
+GO
+
+USE IntegrationEventLog
+GO
+
+CREATE TABLE IntegrationEventLog (
+	EventId UNIQUEIDENTIFIER PRIMARY KEY,
+	EventTypeName NVARCHAR(100),
+	State INT,
+	TimesSent INT,
+	CreationTime DATETIME,
+	Content NVARCHAR(MAX),
+	TranscationId NVARCHAR(200)
+)
