@@ -30,7 +30,8 @@ CREATE TABLE CatalogItems
 	Description NVARCHAR(1000),
 	Price DECIMAL(19,4),
 	PictureUri NVARCHAR(100),
-	CatalogTypeId INT NOT NULL FOREIGN KEY REFERENCES CatalogType(Id),
+	PictureFileName NVARCHAR(100),
+	CatalogTypeId INT NOT NULL FOREIGN KEY REFERENCES CatalogTypes(Id),
 	CatalogBrandId INT NOT NULL FOREIGN KEY REFERENCES CatalogBrands(Id),
 	AvailableStock INT,
 	RestockThreshold INT,
@@ -40,6 +41,13 @@ CREATE TABLE CatalogItems
 
 INSERT INTO CatalogBrands (Brand) VALUES ('BMW')
 GO
+
+INSERT INTO CatalogTypes (Type) VALUES ('CAR')
+GO
+
+INSERT INTO CatalogItems (Name, Description, Price, CatalogTypeId, CatalogBrandId, AvailableStock) VALUES ('M3', 'Performance Car', '100000', '1', '1', '10')
+GO
+
 
 /*
 Create database for integration event log
@@ -57,5 +65,5 @@ CREATE TABLE IntegrationEventLog (
 	TimesSent INT,
 	CreationTime DATETIME,
 	Content NVARCHAR(MAX),
-	TranscationId NVARCHAR(200)
+	TransactionId NVARCHAR(200)
 )

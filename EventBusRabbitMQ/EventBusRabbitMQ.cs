@@ -33,7 +33,7 @@ namespace EventBusRabbitMQ
             IRabbitMQPersistentConnection persistentConnection,
             ILogger<EventBusRabbitMQ> logger,
             IEventBusSubscriptionsManager subsManager, 
-            string queueName = "Catalog_Basket",
+            string queueName = "Basket",
             int retryCount = 5)
         {
             _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));

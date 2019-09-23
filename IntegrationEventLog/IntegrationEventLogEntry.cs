@@ -12,6 +12,11 @@ namespace IntegrationEventLog
     [Table("IntegrationEventLog")]
     public class IntegrationEventLogEntry
     {
+        private IntegrationEventLogEntry()
+        {
+
+        }
+
         public IntegrationEventLogEntry(IntegrationEvent @event, Guid transactionId)
         {
             EventId = @event.Id;

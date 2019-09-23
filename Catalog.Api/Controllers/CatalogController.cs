@@ -150,7 +150,6 @@ namespace Catalog.Api.Controllers
 
             // Update current product
             catalogItem = productToUpdate;
-            _catalogContext.CatalogItems.Update(catalogItem);
 
             // Save product's data and publish integration event through the Event Bus if price has changed
             if (raiseProductPriceChangedEvent)
