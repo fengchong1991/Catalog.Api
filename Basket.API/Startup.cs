@@ -16,6 +16,7 @@ using Autofac;
 using EventBus;
 using Basket.API.IntegrationEvents.Events;
 using Basket.API.IntegrationEvents.EventHandling;
+using RabbitMQ.Client;
 
 namespace Basket.API
 {
@@ -36,7 +37,7 @@ namespace Basket.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env) 
         {
             if (env.IsDevelopment())
             {
@@ -60,6 +61,16 @@ namespace Basket.API
         private void RegisterEventBus(IServiceCollection services)
         {
             services.AddSingleton<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>();
+            services.AddSingleton<IRabbitMQPersistentConnection, DefaultRabbitMQPersistentConnection>();
+            services.AddSingleton<IConnectionFactory, ConnectionFactory>(sp =>
+            {
+                return new ConnectionFactory()
+                {
+                    HostName = Configuration["EventBusConnection"],
+                    DispatchConsumersAsync = true
+                };
+            });
+            services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
         }
 
         private void ConfigureEventBus(IApplicationBuilder app)

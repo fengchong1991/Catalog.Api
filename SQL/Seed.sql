@@ -45,19 +45,13 @@ GO
 INSERT INTO CatalogTypes (Type) VALUES ('CAR')
 GO
 
-INSERT INTO CatalogItems (Name, Description, Price, CatalogTypeId, CatalogBrandId, AvailableStock) VALUES ('M3', 'Performance Car', '100000', '1', '1', '10')
+INSERT INTO CatalogItems (Name, Description, Price, CatalogTypeId, CatalogBrandId, AvailableStock, RestockThreshold, MaxStockThreshold, OnReorder) VALUES ('M3', 'Performance Car', '100000', '1', '1', '10', '5', '10', true)
 GO
 
 
 /*
-Create database for integration event log
+Create table for integration event log
 */
-CREATE DATABASE IntegrationEventLog
-GO
-
-USE IntegrationEventLog
-GO
-
 CREATE TABLE IntegrationEventLog (
 	EventId UNIQUEIDENTIFIER PRIMARY KEY,
 	EventTypeName NVARCHAR(100),

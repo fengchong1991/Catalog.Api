@@ -13,6 +13,14 @@ services:
       - rabbitmq
     ports:
       - 32770:80
+  basket.api:
+    build:
+      context: ./
+      dockerfile: Basket.API/Dockerfile
+    environment:
+      EventBusConnection: rabbitmq
+    depends_on:
+      - rabbitmq
   sql.data:
     image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
     environment:

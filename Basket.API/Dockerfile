@@ -1,20 +1,9 @@
-FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
-COPY ["Basket.API/Basket.API.csproj", "Basket.API/"]
-RUN dotnet restore "Basket.API/Basket.API.csproj"
 COPY . .
-WORKDIR "/src/Basket.API"
-RUN dotnet build "Basket.API.csproj" -c Release -o /app
+RUN dotnet publish Basket.API/Basket.API.csproj -c Release -o /app
 
-FROM build AS publish
-RUN dotnet publish "Basket.API.csproj" -c Release -o /app
-
-FROM base AS final
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=build /app .
 ENTRYPOINT ["dotnet", "Basket.API.dll"]
