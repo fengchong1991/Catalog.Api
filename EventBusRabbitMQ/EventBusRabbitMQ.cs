@@ -24,6 +24,7 @@ namespace EventBusRabbitMQ
         private readonly IRabbitMQPersistentConnection _persistentConnection;
         private readonly ILogger<EventBusRabbitMQ> _logger;
         private readonly IEventBusSubscriptionsManager _subsManager;
+        private readonly ILifetimeScope _autofac;
         private readonly int _retryCount;
 
         private IModel _consumerChannel;
@@ -32,7 +33,8 @@ namespace EventBusRabbitMQ
         public EventBusRabbitMQ(
             IRabbitMQPersistentConnection persistentConnection,
             ILogger<EventBusRabbitMQ> logger,
-            IEventBusSubscriptionsManager subsManager, 
+            IEventBusSubscriptionsManager subsManager,
+            ILifetimeScope autofac,
             string queueName = "Basket",
             int retryCount = 5)
         {
@@ -41,6 +43,7 @@ namespace EventBusRabbitMQ
             _subsManager = subsManager ?? new InMemoryEventBusSubscriptionsManager();
             _queueName = queueName;
             _consumerChannel = CreateConsumerChannel();
+            _autofac = autofac;
             _retryCount = retryCount;
             _subsManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
@@ -264,33 +267,31 @@ namespace EventBusRabbitMQ
 
             if (_subsManager.HasSubscriptionsForEvent(eventName))
             {
-                //using (var scope = _autofac.BeginLifetimeScope(AUTOFAC_SCOPE_NAME))
-                //{
-                //    var subscriptions = _subsManager.GetHandlersForEvent(eventName);
-                //    foreach (var subscription in subscriptions)
-                //    {
-                //        if (subscription.IsDynamic)
-                //        {
-                //            var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
-                //            if (handler == null) continue;
-                //            dynamic eventData = JObject.Parse(message);
+                using (var scope = _autofac.BeginLifetimeScope("eshop_event_bus"))
+                {
+                    var subscriptions = _subsManager.GetHandlersForEvent(eventName);
+                    foreach (var subscription in subscriptions)
+                    {
+                        if (subscription.IsDynamic)
+                        {
+                            //var handler = scope.ResolveOptional(subscription.HandlerType) as IDynamicIntegrationEventHandler;
+                            //if (handler == null) continue;
+                            //dynamic eventData = JObject.Parse(message);
 
-                //            await Task.Yield();
-                //            await handler.Handle(eventData);
-                //        }
-                //        else
-                //        {
-                //            var handler = scope.ResolveOptional(subscription.HandlerType);
-                //            if (handler == null) continue;
-                //            var eventType = _subsManager.GetEventTypeByName(eventName);
-                //            var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
-                //            var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
+                            //await Task.Yield();
+                            //await handler.Handle(eventData);
+                        }
+                        else
+                        {
+                            var eventType = _subsManager.GetEventTypeByName(eventName);
+                            var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
+                            var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(subscription.HandlerType);
 
-                //            await Task.Yield();
-                //            await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
-                //        }
-                //    }
-                //}
+                            await Task.Yield();
+                            await (Task)concreteType.GetMethod("Handle").Invoke(concreteType, new object[] { integrationEvent });
+                        }
+                    }
+                }
             }
             else
             {

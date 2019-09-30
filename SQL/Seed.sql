@@ -45,7 +45,7 @@ GO
 INSERT INTO CatalogTypes (Type) VALUES ('CAR')
 GO
 
-INSERT INTO CatalogItems (Name, Description, Price, CatalogTypeId, CatalogBrandId, AvailableStock, RestockThreshold, MaxStockThreshold, OnReorder) VALUES ('M3', 'Performance Car', '100000', '1', '1', '10', '5', '10', true)
+INSERT INTO CatalogItems (Name, Description, Price, CatalogTypeId, CatalogBrandId, AvailableStock, RestockThreshold, MaxStockThreshold, OnReorder) VALUES ('M3', 'Performance Car', '100000', '1', '1', '10', '5', '10', 1)
 GO
 
 

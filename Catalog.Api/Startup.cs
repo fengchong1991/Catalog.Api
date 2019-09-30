@@ -13,6 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using EventBusRabbitMQ;
 using RabbitMQ.Client;
 using EventBus;
+using Microsoft.Extensions.Logging;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 
 namespace Catalog.Api
 {
@@ -26,7 +29,7 @@ namespace Catalog.Api
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             var connectionString = Configuration["ConnectionString"];
@@ -47,7 +50,11 @@ namespace Catalog.Api
 
             AddIntegrationServices(services);
             AddEventBus(services, Configuration);
-            
+
+            var container = new ContainerBuilder();
+            container.Populate(services);
+
+            return new AutofacServiceProvider(container.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,7 +92,19 @@ namespace Catalog.Api
         
         private void AddEventBus(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddTransient<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>();
+            services.AddSingleton<IEventBus, EventBusRabbitMQ.EventBusRabbitMQ>(sp =>
+            {
+                var rabbitMQPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+                var iLifetimeScope = sp.GetRequiredService<ILifetimeScope>();
+                var logger = sp.GetRequiredService<ILogger<EventBusRabbitMQ.EventBusRabbitMQ>>();
+                var eventBusSubcriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+
+                var retryCount = 5;
+
+                return new EventBusRabbitMQ.EventBusRabbitMQ(rabbitMQPersistentConnection, logger, eventBusSubcriptionsManager, iLifetimeScope, "Basket", retryCount);
+            });
+
+
             services.AddSingleton<IRabbitMQPersistentConnection, DefaultRabbitMQPersistentConnection>();
             services.AddSingleton<IConnectionFactory, ConnectionFactory>(sp =>
             {
